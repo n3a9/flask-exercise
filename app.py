@@ -91,7 +91,7 @@ def retrieve_add_users():
 
 
 @app.route("/users/<id>", methods=["GET", "PUT", "DELETE"])
-def get_user(id):
+def get_edit_delete_user(id):
     if request.method == "GET":
         if db.getById("users", int(id)) is None:
             return create_response(status=404, message="User not found in database.")

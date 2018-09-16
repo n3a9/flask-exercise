@@ -40,15 +40,24 @@ def test_get_user_id(client):
     assert res_user["name"] == "Aria"
     assert res_user["age"] == 19
 
+
 def test_create_user(client):
-    res = client.post("/users", json = {"name": "Neeraj", "age": 17, "team": "TBD"})
+    res = client.post("/users", json={"name": "Neeraj", "age": 17, "team": "TBD"})
     assert res.status_code == 201
 
+    # Sequentially, adding this user will give an id of 5. Becuase the get
+    # function was already tested to work correctly above, we can use it here
+    # and in any future tests
     res_user = client.get("/users/5").json["result"]["user"]
     assert res_user["name"] == "Neeraj"
     assert res_user["age"] == 17
     assert res_user["team"] == "TBD"
     assert res_user["id"] is not None
+
+    # Test for invalid parameters (team parameter missing)
+    res = client.post("/users", json={"name": "Kevin", "age": 178})
+    assert res.status_code == 422
+
 
 def test_update_user(client):
     res = client.put("/users/5", json={"name": "Shreyas", "age": 18})
@@ -60,9 +69,15 @@ def test_update_user(client):
     assert res_user["team"] == "TBD"
     assert res_user["id"] is not None
 
+
 def test_delete_user(client):
     res = client.delete("/users/5")
     assert res.status_code == 200
 
-    res2 = client.get("/users/5")
-    assert res2.status_code == 404
+    # Retrieving the user that was just deleted should throw an error
+    res = client.get("/users/5")
+    assert res.status_code == 404
+
+    # Verify that error is thrown for deleting user that doesn't exist
+    res = client.delete("/users/5")
+    assert res.status_code == 404
