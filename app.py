@@ -104,7 +104,7 @@ def get_user(id):
             return create_response(
                 status=404, message="User with given 'id' not found."
             )
-        return create_response(db.updateById("users", id, data))
+        return create_response(db.updateById("users", int(id), data))
     if request.method == "DELETE":
         if db.getById("users", int(id)) is None:
             return create_response(None, 404, "User with given id cannot be found.")
