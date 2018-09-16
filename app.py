@@ -90,13 +90,31 @@ def retrieve_add_users():
         return create_response(db.create("users", new_user), status=201)
 
 
-@app.route("/users/<id>")
+@app.route("/users/<id>", methods=["GET", "PUT"])
 def get_user(id):
-    if db.getById("users", int(id)) is None:
-        return create_response(status=404, message="User not found in database.")
-    else:
-        data = {"user": db.getById("users", int(id))}
-        return create_response(data)
+    if request.method == "GET":
+        if db.getById("users", int(id)) is None:
+            return create_response(status=404, message="User not found in database.")
+        else:
+            data = {"user": db.getById("users", int(id))}
+            return create_response(data)
+    if request.method == "PUT":
+        param = request.get_json()
+        if param is None:
+            return create_response(
+                status=422,
+                message="No parameters were found in request. Make sure to at least include one field to update for user.",
+            )
+        if db.getById("users", int(id)) is None:
+            return create_response(
+                status=404, message="User with given 'id' not found."
+            )
+        data = {
+            "name": param.get("name"),
+            "age": param.get("age"),
+            "team": param.get("team"),
+        }
+        return create_response(db.updateById("users", id, data))
 
 
 """
