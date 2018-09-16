@@ -52,13 +52,42 @@ def mirror(name):
     return create_response(data)
 
 
-@app.route("/users")
-def get_users():
-    team = request.args.get("team")
-    data = db.get("users")
-    if team is not None:
-        data = [i for i in data if i["team"] == team]
-    return create_response({"users": data})
+@app.route("/users", methods=["GET", "POST"])
+def retrieve_add_users():
+    if request.method == "GET":
+        team = request.args.get("team")
+        data = db.get("users")
+        if team is not None:
+            data = [i for i in data if i["team"] == team]
+        return create_response({"users": data})
+    if request.method == "POST":
+        param = request.get_json()
+        if param is None:
+            return create_response(
+                status=422,
+                message="No parameters were included when trying to create a user. Must include 'name', 'age', and 'team'.",
+            )
+        if param.get("name") is None:
+            return create_response(
+                status=422,
+                message="Parameter 'name' was not included in request. Be sure to include 'name' when creating a user.",
+            )
+        if param.get("age") is None:
+            return create_response(
+                status=422,
+                message="Parameter 'age' was not included in request. Be sure to include 'age' when creating a user.",
+            )
+        if param.get("team") is None:
+            return create_response(
+                status=422,
+                message="Parameter 'team' was not included in request. Be sure to include 'team' when creating a user.",
+            )
+        new_user = {
+            "name": param.get("name"),
+            "age": param.get("age"),
+            "team": param.get("team"),
+        }
+        return create_response(db.create("users", new_user), status=201)
 
 
 @app.route("/users/<id>")
