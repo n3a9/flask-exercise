@@ -51,8 +51,9 @@ def mirror(name):
     data = {"name": name}
     return create_response(data)
 
-
-# TODO: Implement the rest of the API here!
+@app.route("/users")
+def get_users():
+    return create_response(db.initial_db_state)
 
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~
