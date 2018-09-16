@@ -90,7 +90,7 @@ def retrieve_add_users():
         return create_response(db.create("users", new_user), status=201)
 
 
-@app.route("/users/<id>", methods=["GET", "PUT"])
+@app.route("/users/<id>", methods=["GET", "PUT", "DELETE"])
 def get_user(id):
     if request.method == "GET":
         if db.getById("users", int(id)) is None:
@@ -99,22 +99,18 @@ def get_user(id):
             data = {"user": db.getById("users", int(id))}
             return create_response(data)
     if request.method == "PUT":
-        param = request.get_json()
-        if param is None:
-            return create_response(
-                status=422,
-                message="No parameters were found in request. Make sure to at least include one field to update for user.",
-            )
+        data = request.get_json()
         if db.getById("users", int(id)) is None:
             return create_response(
                 status=404, message="User with given 'id' not found."
             )
-        data = {
-            "name": param.get("name"),
-            "age": param.get("age"),
-            "team": param.get("team"),
-        }
         return create_response(db.updateById("users", id, data))
+    if request.method == "DELETE":
+        if db.getById("users", int(id)) is None:
+            return create_response(None, 404, "User with given id cannot be found.")
+        return create_response(
+            db.deleteById("users", int(id)), message="User successfully deleted."
+        )
 
 
 """
